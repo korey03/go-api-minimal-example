@@ -23,9 +23,9 @@ jobs:
         env:
           GOOS: linux
         run: |
+          mkdir -p dist
           go build -o ${APP_NAME} main.go
           tar -cvzf ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}
-          mkdir -p dist
           mv ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz dist/${GOOS}
 
       - name: Go build windows
@@ -34,7 +34,6 @@ jobs:
         run: |
           go build -o ${APP_NAME}.exe main.go
           tar -cvzf ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}.exe
-          mkdir -p dist
           mv ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz dist/${GOOS}
 
       - name: Go build darwin
@@ -43,14 +42,37 @@ jobs:
         run: |
           go build -o ${APP_NAME} main.go
           tar -cvzf ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}
-          mkdir -p dist
           mv ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz dist/${GOOS}
 
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3
+      - name: Get latest release
+        uses: octokit/request-action@v2.x
+        id: get_latest_release
         with:
-          name: Upload artifacts
-          path: |
-            dist/linux
-            dist/windows
-            dist/darwin
+            route: GET /repos/:repository/releases/latest
+            repository: ${{ github.repository }}
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get upload url
+        id: get_upload_url
+        run: |
+          url=$(echo "$response" | jq -r '.upload_url')
+          echo "::set-output name=url::$url"
+        env: 
+            response:  ${{ steps.get_latest_release.outputs.data }}
+
+      - name: Upload Release Assets
+        id: upload-release-assets
+        uses: dwenegar/upload-release-assets@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release_id: ${{ steps.create_release.outputs.id }}
+          assets_path: path/to/my/assets
+
+      - name: Upload Multiple Release Assets
+        uses: NBTX/upload-release-assets@v1
+        with:
+          upload_url: ${{steps.get_upload_url.outputs.url}}
+          # A glob of assets to upload
+          targets: dist/*
