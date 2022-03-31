@@ -26,7 +26,7 @@ jobs:
           GOOS: linux
         run: |
           go build -o ${APP_NAME} main.go
-          tar ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}
+          tar -cvzf ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}
           mv ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz dist/${GOOS}
 
       - name: Go build windows
@@ -34,7 +34,7 @@ jobs:
           GOOS: windows
         run: |
           go build -o ${APP_NAME}.exe main.go
-          tar ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}.exe
+          tar -cvzf ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}.exe
           mv ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz dist/${GOOS}
 
       - name: Go build darwin
@@ -42,7 +42,7 @@ jobs:
           GOOS: darwin
         run: |
           go build -o ${APP_NAME} main.go
-          tar ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}
+          tar -cvzf ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}
           mv ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz dist/${GOOS}
 
       - name: Upload a Build Artifact
