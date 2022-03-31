@@ -18,8 +18,6 @@ jobs:
 
       - name: Checkout the repository
         uses: actions/checkout@v2
-        with:
-          run: mkdir dist
 
       - name: Go build linux
         env:
@@ -27,6 +25,7 @@ jobs:
         run: |
           go build -o ${APP_NAME} main.go
           tar -cvzf ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}
+          mkdir -p dist
           mv ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz dist/${GOOS}
 
       - name: Go build windows
@@ -35,6 +34,7 @@ jobs:
         run: |
           go build -o ${APP_NAME}.exe main.go
           tar -cvzf ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}.exe
+          mkdir -p dist
           mv ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz dist/${GOOS}
 
       - name: Go build darwin
@@ -43,6 +43,7 @@ jobs:
         run: |
           go build -o ${APP_NAME} main.go
           tar -cvzf ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}
+          mkdir -p dist
           mv ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz dist/${GOOS}
 
       - name: Upload a Build Artifact
