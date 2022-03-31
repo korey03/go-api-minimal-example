@@ -2,21 +2,54 @@ name: Generate release-artifacts
 
 on:
   release:
-    types: 
+    types:
         - created
 
 jobs:
 
   generate:
-    name: Generate cross-platform builds
+    name: Generate cross-platform builds for amd64
     runs-on: ubuntu-latest
+    env:
+      APP_NAME: go-api-minimal-example
+      GOARCH: amd64
 
     steps:
 
       - name: Checkout the repository
         uses: actions/checkout@v2
-
-      - name: Generate build files
-        uses: thatisuday/go-cross-build@v1.1.0
         with:
-          platforms: 'linux/amd64, darwin/amd64, windows/amd64'
+          run: mkdir dist
+
+      - name: Go build linux
+        env:
+          GOOS: linux
+        run: |
+          go build -o ${APP_NAME} main.go
+          tar ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}
+          mv ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz dist/${GOOS}
+
+      - name: Go build windows
+        env:
+          GOOS: windows
+        run: |
+          go build -o ${APP_NAME}.exe main.go
+          tar ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}.exe
+          mv ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz dist/${GOOS}
+
+      - name: Go build darwin
+        env:
+          GOOS: darwin
+        run: |
+          go build -o ${APP_NAME} main.go
+          tar ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz views/* README.md LICENSE ${APP_NAME}
+          mv ${APP_NAME}__${GOOS}-${GOARCH}.tar.gz dist/${GOOS}
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Upload artifacts
+          path: |
+            dist/linux
+            dist/windows
+            dist/darwin
